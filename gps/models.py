@@ -10,3 +10,4 @@ class GPSDataPoint(models.Model):
     velocity = models.FloatField(blank=True, default=0.0)
     timestamp = models.DateTimeField(auto_now=True)
     
+    
