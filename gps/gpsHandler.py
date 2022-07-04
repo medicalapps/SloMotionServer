@@ -29,7 +29,7 @@ class GPSReader():
                 print(port)
 
 
-            self.ser = serial.Serial('COM3',baudrate=4800,timeout=1)
+            self.ser = serial.Serial('/dev/USB0',baudrate=4800,timeout=1)
             self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser))
 
             self.readGPSData()
