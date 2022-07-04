@@ -110,6 +110,10 @@ ENV/
 env.bak/
 venv.bak/
 
+
+#other
+maps/*
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -127,3 +131,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
