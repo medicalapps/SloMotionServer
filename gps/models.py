@@ -10,4 +10,6 @@ class GPSDataPoint(models.Model):
     velocity = models.FloatField(blank=True, default=0.0)
     timestamp = models.DateTimeField(auto_now=True)
     
-    
+
+class GPSSettings(models.Model):
+    traceLeanght = models.IntegerField(blank=True, default=10)
