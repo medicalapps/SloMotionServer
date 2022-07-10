@@ -2,7 +2,7 @@ from datetime import timedelta
 import sys
  
 
- 
+import os
 
 import io
 from time import time
@@ -10,7 +10,7 @@ from time import time
 import pynmea2
 import serial
 import serial.tools.list_ports
-from gps.models import GPSDataPoint, GPSSettings 
+from gps.models import GPSDataPoint, GPSSettings, Route 
 
 import geopy.distance 
 import math, numpy as np
@@ -27,8 +27,12 @@ class GPSReader():
             for port in availableports:
                 print(port)
 
+            if os.name == 'nt':
+                self.ser = serial.Serial('COM16',baudrate=4800,timeout=1)
+            
+            else:
 
-            self.ser = serial.Serial('/dev/ttyUSB0',baudrate=4800,timeout=1)
+                self.ser = serial.Serial('/dev/ttyUSB0',baudrate=4800,timeout=1)
             self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser))
 
             self.readGPSData()
@@ -78,7 +82,7 @@ class GPSReader():
                     )
 
                 
-                AllPioints = GPSDataPoint.objects.all()
+                AllPioints = GPSDataPoint.objects.filter(useForCalculation = True)
                 LenAllPoints = len(AllPioints) 
                 settings = GPSSettings.objects.all().first()
                 trace = settings.traceLeanght
@@ -87,13 +91,15 @@ class GPSReader():
                 calcfrompoint = LenAllPoints - trace
                 calcFrom = AllPioints[calcfrompoint]
                 newGPSPointe = AllPioints.last()
-                timediff =  newGPSPointe.timestamp - calcFrom.timestamp
+                timediff =  (newGPSPointe.timestamp - calcFrom.timestamp).seconds
                 bearing, distanse = self.getbearingAndSpeed(calcFrom.lat, calcFrom.lng, newGPSPointe.lat, newGPSPointe.lng)
 
                 newGPSPointe.bearing = bearing
 
 
-                newGPSPointe.velocity = distanse/(timediff).seconds         
+                newGPSPointe.velocity = (distanse)/timediff    
+
+
 
                 print(f'writing new GPS-point: lat:{newGPSPointe.lat} lng:{newGPSPointe.lng} speed:{newGPSPointe.velocity} bearing:{newGPSPointe.bearing}')
                 
@@ -110,7 +116,7 @@ class GPSReader():
         distanse = -1
     
         try:
-            distanse = geopy.distance.geodesic((lat1,lon1), (lat2,lon2)).km
+            distanse = geopy.distance.geodesic((lat1,lon1), (lat2,lon2)).m
         except:
             pass
     
@@ -126,4 +132,12 @@ class GPSReader():
 
         return [bearing, distanse]
 
+
+    def navigate(self):
+        ActiveRoutes = Route.objects.filter(active=True)
+        if len(ActiveRoutes) == 1:
+            ActiveRoute = ActiveRoutes[0]
+            remainingWaypoints = ActiveRoute.waypoints.filter(visited=False).order_by('order')
+        elif len(ActiveRoutes) > 1:
+            
 #gpsReader = GPSReader()

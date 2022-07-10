@@ -1,0 +1,32 @@
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>Bus Data</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <script src="lib/jquery-1.10.2.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="/primus/primus.js"></script>
+  <script src="/lib/messages.js"></script>
+  <script src="/src/busdata.js"></script>
+
+</head>
+<body>
+<div id="busdata"/>
+
+
+<script>
+var busdata = new Busdata();
+busdata.init("#busdata");
+
+var primus = Primus.connect("http://" + window.location.host + "/",
+    {reconnect: {
+      maxDelay: 60000,
+      minDelay: 500,
+      retries: Infinity
+    }});
+primus.on('data', busdata.onData);
+</script>
+</body>
+</html>
